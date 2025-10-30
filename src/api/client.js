@@ -25,7 +25,7 @@ class Client {
         if (
           err.response?.status === 401 &&
           !original._retry &&
-          !original.url.includes('/auth/token/refresh')
+          !original.url.includes('/auth/token/get-tokens')
         ) {
           original._retry = true
           try {
@@ -122,7 +122,7 @@ class Client {
 
   async refreshTokens() {
     try {
-      const res = await this.axios.get('/api/v1/auth/token/refresh')
+      const res = await this.axios.get('/api/v1/auth/token/get-tokens')
       if (res.status === 200) {
         this.setAccessToken(res.data.access_token)
         return { access: res.data.access_token, code: res.status }
@@ -145,12 +145,14 @@ class Client {
     const store = useUserStore()
     const res = await apiClient.apiFetch('/api/v1/auth/check')
 
+    console.log(res)
+
     if (!res || res.status !== 200) {
       store.clearUser()
       await router.push('/need_auth')
     }
-
-    store.setUser(res.data)
+    console.log(res.data.user)
+    store.setUser(res.data.user)
   }
 
   async apiFetch(url, opts = {}) {

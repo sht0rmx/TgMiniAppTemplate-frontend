@@ -95,18 +95,15 @@ async function bootstrap() {
 
   app.mount('#app')
 
-  const ok = await initAuth()
-  const current = router.currentRoute.value.name
-
-  if (!ok && !isTgEnv && !['need_auth', 'unauthorized'].includes(current)) {
-    await router.push('/need_auth')
-  }
-  if (!ok && isTgEnv && !['need_auth', 'unauthorized'].includes(current)) {
-    await router.push('/unauthorized')
-  }
-
-  console.log('Auth OK:', ok)
-  isLoading.value = false
+  initAuth().then(ok => {
+    console.log('Auth OK:', ok)
+    isLoading.value = false
+    
+    const current = router.currentRoute.value.name
+    if (!ok && !isTgEnv && !['need_auth', 'unauthorized'].includes(current)) {
+      router.push('/need_auth')
+    }
+  })
 }
 
 bootstrap()
