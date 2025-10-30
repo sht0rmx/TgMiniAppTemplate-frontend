@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { useUserStore } from '@/store/user.js'
 import { useRouter } from 'vue-router'
+import * as Fingerprint2 from 'fingerprintjs2'
+import * as UAParser from 'ua-parser-js'
 
 const router = useRouter()
 
@@ -61,14 +63,59 @@ class Client {
     }
   }
 
+  async setFingerprint() {
+    if (this.fingerprint) return this.fingerprint
+
+    const getHash = async () => {
+      const options = {
+        excludes: {
+          plugins: true,
+          localStorage: true,
+          adBlock: true,
+          screenResolution: true,
+          availableScreenResolution: true,
+          enumerateDevices: true,
+          pixelRatio: true,
+          doNotTrack: true
+        },
+        preprocessor: (key, value) => {
+          if (key === 'userAgent') {
+            const parser = new UAParser.UAParser(value)
+            return `${parser.getOS().name} :: ${parser.getBrowser().name} :: ${parser.getEngine().name}`
+          }
+          return value
+        }
+      }
+
+      const components = await Fingerprint2.getPromise(options)
+      const values = components.map(c => c.value)
+      return String(Fingerprint2.x64hash128(values.join(''), 31))
+    }
+
+    if (window.requestIdleCallback) {
+      this.fingerprint = await new Promise(resolve =>
+        requestIdleCallback(async () => resolve(await getHash()))
+      )
+    } else {
+      this.fingerprint = await new Promise(resolve =>
+        setTimeout(async () => resolve(await getHash()), 500)
+      )
+    }
+
+    this.axios.defaults.headers.common['Fingerprint'] = this.fingerprint
+    return this.fingerprint
+  }
+
   async login(initData) {
+    console.log({
+      initData
+    })
     const res = await this.axios.post('/api/v1/auth/login/webapp', {
-      initData,
-      userAgent: navigator.userAgent,
+      initData
     })
     if (res.status === 200) {
-      this.setAccessToken(res.data.tokens.access_token)
-      return { access: res.data.tokens.access_token, code: res.status }
+      this.setAccessToken(res.data.access_token)
+      return { access: res.data.access_token, code: res.status }
     }
     return { access: null, code: res.status }
   }

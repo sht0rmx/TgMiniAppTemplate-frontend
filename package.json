@@ -23,7 +23,7 @@
     "lucide-vue-next": "^0.545.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
-    "reka-ui": "^2.5.1",
+    "reka-ui": "^2.6.0",
     "remixicon": "^4.6.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",

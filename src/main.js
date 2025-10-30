@@ -37,6 +37,7 @@ sysDark.addEventListener('change', e => setTheme(e.matches))
 
 async function initAuth() {
   try {
+    await apiClient.setFingerprint()
     await apiClient.ping()
 
     if (!apiClient.getAccessToken()) {
