@@ -7,6 +7,7 @@ import * as UAParser from 'ua-parser-js'
 const router = useRouter()
 
 const API_URL = import.meta.env.VITE_API_URL
+const TG_BOT_USERNAME = import.meta.env.TG_BOT_USERNAME
 
 class Client {
   constructor() {
@@ -145,13 +146,10 @@ class Client {
     const store = useUserStore()
     const res = await apiClient.apiFetch('/api/v1/auth/check')
 
-    console.log(res)
-
     if (!res || res.status !== 200) {
       store.clearUser()
       await router.push('/need_auth')
     }
-    console.log(res.data.user)
     store.setUser(res.data.user)
   }
 
@@ -171,6 +169,48 @@ class Client {
       throw err
     }
   }
+
+  async startQrLogin() {
+    await this.setFingerprint() 
+    
+    try {
+        const res = await this.axios.get('/api/v1/auth/login/getqr') 
+        
+        if (res.status !== 200 || !res.data.login_id) {
+            throw new Error('Failed to retrieve login ID from server.')
+        }
+
+        const loginId = res.data.login_id
+        const base64Params = btoa(loginId)
+        
+        const qrUrl = `app://adddevice?loginid=${base64Params}` 
+        
+        return { loginId, qrUrl } 
+
+    } catch (error) {
+        console.error("Error starting QR login process:", error)
+        throw error
+    }
+  }
+  
+  async startSSE(loginid) {
+    evtSource = new EventSource(`/api/auth/sse/check/${loginid}`);
+
+    evtSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("SSE message:", data);
+
+        if(data.type === 'qr_scanned') {
+            checkLoginConfirmation(data.temp_token);
+        }
+    };
+
+    evtSource.onerror = (err) => {
+        console.error('SSE error:', err);
+        evtSource.close();
+        setTimeout(startSSE, 1000);
+    };
+}
 }
 
 export const apiClient = new Client()

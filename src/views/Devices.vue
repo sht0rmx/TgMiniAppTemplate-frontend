@@ -20,6 +20,11 @@ const drawerOpen = ref(false)
 const devicedata = ref<any>(null)
 const showAdd = ref(false)
 
+
+const handleScannerClose = () => {
+  showAdd.value = false
+}
+
 const openDrawer = (device: any) => {
   selectedDevice.value = device
   drawerOpen.value = true
@@ -125,25 +130,14 @@ onMounted(() => getCurrentDevice())
         </div>
       </DrawerContent>
     </Drawer>
-    <transition name="slide-up">
-      <AddDevice v-if="showAdd" @close="showAdd = false" />
+    <transition name="fade">
+      <AddDevice v-if="showAdd" @close="handleScannerClose" />
     </transition>
   </div>
 </template>
 
 <style scoped>
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.35s ease;
-}
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-.slide-up-enter-to,
-.slide-up-leave-from {
-  transform: translateY(0%);
-  opacity: 1;
-}
+.fade-enter-active, .fade-leave-active { transition: opacity 0.35s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-to, .fade-leave-from { opacity: 1; }
 </style>
