@@ -7,7 +7,7 @@ import * as UAParser from 'ua-parser-js'
 const router = useRouter()
 
 const API_URL = import.meta.env.VITE_API_URL
-const TG_BOT_USERNAME = import.meta.env.TG_BOT_USERNAME
+const FRONT_URL = import.meta.env.VITE_FRONTEND_URL
 
 class Client {
   constructor() {
@@ -77,7 +77,7 @@ class Client {
           availableScreenResolution: true,
           enumerateDevices: true,
           pixelRatio: true,
-          doNotTrack: true
+          doNotTrack: true,
         },
         preprocessor: (key, value) => {
           if (key === 'userAgent') {
@@ -85,21 +85,21 @@ class Client {
             return `${parser.getOS().name} :: ${parser.getBrowser().name} :: ${parser.getEngine().name}`
           }
           return value
-        }
+        },
       }
 
       const components = await Fingerprint2.getPromise(options)
-      const values = components.map(c => c.value)
+      const values = components.map((c) => c.value)
       return String(Fingerprint2.x64hash128(values.join(''), 31))
     }
 
     if (window.requestIdleCallback) {
-      this.fingerprint = await new Promise(resolve =>
-        requestIdleCallback(async () => resolve(await getHash()))
+      this.fingerprint = await new Promise((resolve) =>
+        requestIdleCallback(async () => resolve(await getHash())),
       )
     } else {
-      this.fingerprint = await new Promise(resolve =>
-        setTimeout(async () => resolve(await getHash()), 500)
+      this.fingerprint = await new Promise((resolve) =>
+        setTimeout(async () => resolve(await getHash()), 10),
       )
     }
 
@@ -109,10 +109,10 @@ class Client {
 
   async login(initData) {
     console.log({
-      initData
+      initData,
     })
     const res = await this.axios.post('/api/v1/auth/login/webapp', {
-      initData
+      initData,
     })
     if (res.status === 200) {
       this.setAccessToken(res.data.access_token)
@@ -171,45 +171,80 @@ class Client {
   }
 
   async startQrLogin() {
-    await this.setFingerprint() 
-    
+    await this.setFingerprint()
+
     try {
-        const res = await this.axios.get('/api/v1/auth/login/getqr') 
-        
-        if (res.status !== 200 || !res.data.login_id) {
-            throw new Error('Failed to retrieve login ID from server.')
-        }
+      const res = await this.axios.get('/api/v1/auth/login/getqr')
 
-        const loginId = res.data.login_id
-        const base64Params = btoa(loginId)
-        
-        const qrUrl = `app://adddevice?loginid=${base64Params}` 
-        
-        return { loginId, qrUrl } 
+      if (res.status !== 200 || !res.data.login_id) {
+        throw new Error('Failed to retrieve login ID from server.')
+      }
 
+      const loginId = res.data.login_id
+      const base64Params = btoa(loginId)
+
+      const qrUrl = `${FRONT_URL}adddevice?loginid=${base64Params}`
+
+      const result = await this.startSseConfirmation(loginId)
+
+      return { 
+        loginId, 
+        qrUrl, 
+        authPromise: result.authPromise, 
+        cancelSse: result.cancel
+    };
     } catch (error) {
-        console.error("Error starting QR login process:", error)
-        throw error
+      console.error('Error starting QR login process:', error)
+      throw error
     }
   }
-  
-  async startSSE(loginid) {
-    evtSource = new EventSource(`/api/auth/sse/check/${loginid}`);
 
-    evtSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("SSE message:", data);
+  async startSseConfirmation(loginId) {
+    let evtSource = null;
 
-        if(data.type === 'qr_scanned') {
-            checkLoginConfirmation(data.temp_token);
+    const cancel = () => {
+        if (evtSource) {
+            console.log('SSE connection manually closed.');
+            evtSource.close();
+            evtSource = null;
         }
     };
 
-    evtSource.onerror = (err) => {
-        console.error('SSE error:', err);
-        evtSource.close();
-        setTimeout(startSSE, 1000);
+    const connect = (loginId) => {
+        return new Promise((resolve, reject) => {
+            const url = `${API_URL}api/v1/auth/sse/check/${loginId}`;
+            
+            try {
+                evtSource = new EventSource(url);
+            } catch (error) {
+                console.log(error)
+                reject(new Error("EventSource initialization failed."));
+                return;
+            }
+
+            evtSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'auth_success' && data.access_token) {
+                    cancel();
+                    resolve(data.access_token); 
+                } else if (data.type === 'auth_denied' || data.type === 'timeout') {
+                    cancel();
+                    reject(new Error(data.message || "Login denied or timed out."));
+                }
+            };
+
+            evtSource.onerror = (err) => {
+                console.error('SSE error, attempting reconnect:', err);
+                cancel();
+
+                setTimeout(() => {
+                    connect(loginId).then(resolve).catch(reject);
+                }, 1000); 
+            };
+        });
     };
+
+    return { authPromise: connect(loginId), cancel };
 }
 }
 

@@ -7,6 +7,7 @@ import NeedAuthView from '@/views/Errors/NeedAuth.vue'
 import SettingsView from '@/views/Settings.vue'
 import NotFoundView from '@/views/Errors/NotFound.vue'
 import DevicesView from '@/views/Devices.vue'
+import AddDeviceView from '@/views/AddDevice.vue'
 import UnauthorizedView from '@/views/Errors/Unauthorized.vue'
 
 import { isTgEnv, WebApp } from '@/main.js'
@@ -48,6 +49,12 @@ const routes = [
     name: 'Devices',
     component: DevicesView,
     meta: { titleKey: 'views.devices.header' },
+  },
+  {
+    path: '/adddevice',
+    name: 'AddDevice',
+    component: AddDeviceView,
+    meta: { titleKey: 'views.adddevice.header' },
   },
   {
     path: '/:pathMatch(.*)*',

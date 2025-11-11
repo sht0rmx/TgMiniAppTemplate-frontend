@@ -21,20 +21,6 @@ export let isTgEnv = false
 export let WebApp = null
 export let isLoading = ref(true)
 
-const sysDark = window.matchMedia('(prefers-color-scheme: dark)')
-
-function setTheme(isDark) {
-  if (isDark) {
-    document.documentElement.classList.add('dark')
-    document.documentElement.setAttribute('data-theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    document.documentElement.setAttribute('data-theme', 'light')
-  }
-}
-
-sysDark.addEventListener('change', e => setTheme(e.matches))
-
 async function initAuth() {
   try {
     await apiClient.setFingerprint()
@@ -90,8 +76,6 @@ async function bootstrap() {
   app.use(pinia)
   app.use(i18n)
   app.use(router)
-
-  setTheme(sysDark.matches)
 
   app.mount('#app')
 
