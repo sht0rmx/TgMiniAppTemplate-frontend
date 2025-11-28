@@ -26,20 +26,42 @@ export default {
 </script>
 
 <template>
-  <div v-if="show" class="fixed bottom-4 z-50 px-4 text-cbase">
-    <div role="alert" class="alert alert-info shadow-lg flex items-center gap-4 rounded-3xl">
-      <i class="ri-refresh-line text-2xl"></i>
-      <div class="flex-1">
-        <span>{{ $t('components.popup.text') }}</span>
-      </div>
-      <div class="flex-none flex gap-2">
-        <button class="btn btn-sm btn-primary" @click="update">
-          <i class="ri-refresh-line"></i>
-        </button>
-        <button class="btn btn-sm btn-ghost" @click="close">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
+  <transition name="slide-up-fade">
+    <div v-if="show" class="fixed bottom-6 inset-x-0 flex justify-center z-50 px-4">
+      <UAlert
+        :title="$t('components.popup.title')"
+        :description="$t('components.popup.desc')"
+        color="neutral"
+        variant="outline"
+        :actions="[
+          { label: $t('components.popup.update'), variant: 'solid', color: 'accent', onClick: update },
+          { label: $t('components.popup.close'), variant: 'subtle', color: 'neutral', onClick: close }
+        ]"
+        class="max-w-md w-full"
+      />
     </div>
-  </div>
+  </transition>
 </template>
+
+<style scoped>
+.slide-up-fade-enter-active,
+.slide-up-fade-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-up-fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.slide-up-fade-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+.slide-up-fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+.slide-up-fade-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+</style>

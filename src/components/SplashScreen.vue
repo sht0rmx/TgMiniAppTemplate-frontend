@@ -1,9 +1,14 @@
-<script setup lang="js">
+<script setup lang="ts">
 </script>
 
+
 <template>
-  <div id="splash" aria-hidden="true">
-    <div style="text-align: center">
+  <transition name="fade">
+    <div
+      id="splash"
+      aria-hidden="true"
+      class="bg-background/95 flex items-center justify-center"
+    >
       <svg
         aria-label="logo"
         class="logo"
@@ -33,32 +38,32 @@
         />
       </svg>
     </div>
-  </div>
+  </transition>
 </template>
 
 <style scoped>
 #splash {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
   z-index: 9999;
-  transition:
-    opacity 350ms ease,
-    visibility 350ms ease;
-  opacity: 1;
-  visibility: visible;
 }
 
-#splash.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-#splash .logo {
+.logo {
   width: 256px;
   height: 256px;
   display: block;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.35s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>

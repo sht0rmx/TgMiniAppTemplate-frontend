@@ -1,13 +1,12 @@
 <template>
-  <Card class="inline-flex items-center justify-center p-4 bg-white rounded-xl shadow-sm">
+  <div class="card flex items-center justify-center p-10 bg-white rounded-xl shadow w-50 h-50">
     <canvas ref="canvas"></canvas>
-  </Card>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue'
 import QRCode from 'qrcode'
-import { Card } from './ui/card'
 
 const props = defineProps({
   url: { type: String, required: true },
@@ -29,7 +28,7 @@ async function draw(val: string) {
     await QRCode.toCanvas(canvas.value, val.trim(), {
       width: props.size,
       margin: 1,
-      color: { dark: '#000000', light: '#ffffff' }
+      color: { dark: '#000', light: '#fff' }
     })
   } catch (err) {
     console.error('Failed to draw QR:', err)

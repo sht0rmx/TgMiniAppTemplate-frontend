@@ -1,126 +1,84 @@
-<script setup lang="js">
-import { ref, onMounted, onUnmounted } from "vue"
-import { useRouter } from 'vue-router'
-import QrCode from '@/components/QrCode.vue'
-import { apiClient } from '@/api/client'
-import Button from "@/components/ui/button/Button.vue"
+<script setup lang="ts">
+import { apiClient } from '@/api/api';
+import { AuthService } from '@/api/auth.api';
+import QrCode from '@/components/QrCode.vue';
+import { onMounted, ref, type Ref, onBeforeUnmount } from 'vue';
 
-const router = useRouter()
-const botName = import.meta.env.VITE_BOTNAME
-const maxTime = 5 * 60
+const qrUrl: Ref<string> = ref("")
+let authPromise: Promise<unknown> | null = null
+let sseCancel: (() => void) | null = null
+let loginId: string = ""
 
-const loginId = ref("none")
-const qrUrl = ref("")
-const timerDisplay = ref(formatTime(maxTime))
-const statusMessage = ref("Initializing...")
-let timer = null
-let cancelSse = null
+let timer: number | null = null
+const QR_LIFETIME = 5 * 60 * 1000   // 5 minutes
 
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60).toString()
-  const s = Math.floor(seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
-}
-
-function startTimer() {
-  if (timer) clearInterval(timer)
-  let remain = maxTime
-  timerDisplay.value = formatTime(remain)
-
-  timer = setInterval(() => {
-    remain -= 1
-    if (remain <= 0) {
-      clearInterval(timer)
-      timer = null
-      console.log("QR Code timed out. Restarting login process.")
-      startLogin()
-      return
-    }
-    timerDisplay.value = formatTime(remain)
-  }, 1000)
-}
-
-async function startLogin() {
-  if (timer) clearInterval(timer)
-  if (cancelSse) cancelSse()
-
+function stopQR() {
   qrUrl.value = ""
-  statusMessage.value = "Generating QR code and waiting for server ID..."
-  loginId.value = "none"
+  if (sseCancel) sseCancel()
+  sseCancel = null
 
-  try {
-    console.log("generating qr")
-    const result = await apiClient.startQrLogin()
-
-    loginId.value = result.loginId
-    qrUrl.value = result.qrUrl
-    cancelSse = result.cancelSse
-    statusMessage.value = "Scan the QR code to log in. Waiting for approval..."
-
-    startTimer()
-
-    result.authPromise.then(async accessToken => {
-      if (!accessToken) return
-      console.log("Approved, got token:", accessToken)
-
-      clearInterval(timer)
-      apiClient.setAccessToken(accessToken)
-      statusMessage.value = "✅ Approved! Redirecting..."
-      setTimeout(() => router.push('/'), 1000)
-    }).catch(err => {
-      console.error("Error waiting for approval:", err)
-      statusMessage.value = "Authorization failed. Retrying..."
-      setTimeout(startLogin, 5000)
-    })
-
-    // clearInterval(timer) 
-    // apiClient.setAccessToken(accessToken)
-    // statusMessage.value = "Login successful! Redirecting..."
-
-    // await router.push('/') 
-
-  } catch (err) {
-    console.error("Error during QR login flow:", err)
-    clearInterval(timer)
-
-    statusMessage.value = `Login failed: ${err.message || 'Unknown error'}. Retrying in 5 seconds...`
-    qrUrl.value = ""
-
-    setTimeout(startLogin, 5000)
-  }
+  if (timer) clearTimeout(timer)
+  timer = null
 }
 
-onMounted(() => {
-  startLogin()
-})
+async function startQR() {
+  stopQR()
 
-onUnmounted(() => {
-  if (timer) clearInterval(timer)
-  if (cancelSse) {
-    cancelSse()
-  }
-})
+  const resp = await AuthService.startQrLogin()
+
+  loginId = resp.loginId
+  qrUrl.value = resp.qrUrl
+  authPromise = resp.authPromise
+  sseCancel = resp.cancelSse
+
+  timer = window.setTimeout(() => {
+    console.log("QR expired → closing SSE")
+    stopQR()
+  }, QR_LIFETIME)
+
+  authPromise
+    ?.then(token => {
+      console.log("Auth success:", token)
+      stopQR()
+    })
+    .catch(err => {
+      console.warn("Auth rejected:", err)
+      stopQR()
+    })
+}
+
+onMounted(() => startQR())
+onBeforeUnmount(() => stopQR())
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen text-center gap-3 text-cbase w-md p-4">
-    <i class="ri-key-line text-8xl text-accent"></i>
-    <h1 class="text-3xl font-bold">{{ $t('views.login.title') }}</h1>
+    <div class="flex flex-col min-h-full items-center justify-center px-4">
+        <div class="card bg-base-100 w-90">
+            <div class="card-body flex flex-col items-center text-center gap-3">
+                <div class="flex flex-col items-center justify-center">
+                    <i class="ri-user-line text-3xl" />
+                    <h2 class="card-title text-2xl">{{ $t('views.auth.title') }}</h2>
+                    <p class="opacity-70">{{ $t('views.auth.hint') }}</p>
+                </div>
+                <div v-if="!qrUrl" class="card w-50 h-50 bg-base-200/30">
+                    <div class="card-body flex flex-col items-center justify-center h-full text-center">
+                        <button class="btn btn-small btn-accent btn-soft flex flex-row items-center gap-1">
+                            <i class="ri-reset-right-line text-base"></i>
+                            <span class="text-base">{{ $t('views.auth.try_again') }}</span>
+                        </button>
+                    </div>
+                </div>
+                <QrCode v-else :url="qrUrl"></QrCode>
 
-    <div class="w-64 h-64 flex items-center justify-center bg-card-secondary rounded-lg shadow-md">
-      <QrCode v-if="qrUrl" :url="qrUrl" />
-      <p v-else class="text-gray-500 p-4">{{ statusMessage }}</p>
+                <div class="flex flex-row gap-3">
+                    <button class="btn btn-small btn-square">
+                        <i class="ri-github-line text-2xl"></i>
+                    </button>
+                    <button class="btn btn-small btn-square">
+                        <i class="ri-telegram-2-line text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <p class="text-hint text-sm max-w-xs text-center my-1">
-      {{ $t('views.login.hint', { botname: botName }) }}
-      <span v-if="qrUrl" class="font-bold text-accent">({{ timerDisplay }})</span>
-      <span v-else class="text-sm text-gray-400">{{ statusMessage }}</span>
-    </p>
-
-    <Button v-if="!qrUrl" @click="startLogin" class="mt-2">
-      Try Again
-    </Button>
-  </div>
 </template>

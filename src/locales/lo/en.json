@@ -3,97 +3,78 @@
     "home": {
       "header": "Home",
       "title": "Example TG MiniApp",
-      "description": "This is a simple repository that can be used as a starting point for your project.\nThe template is based on Vue.js and includes a UI library and an icon set. For convenience, the template uses an ORM client for PostgreSQL and MinIO as an S3-compatible data store, which can be further integrated with the database. Express.js is used to handle API endpoints, and AioGram (in Python) is used for interacting with the Telegram API.",
-      "hint": "To check the API status, you can open the settings tab via the button on the dock or click the button.",
+      "description": "This is a simple repository that can be used as a starting point for your project.\nThe template is based on Vue.js and includes a UI library and an icon set. For convenience, the template uses an ORM client for PostgreSQL and MinIO as an S3-compatible data store, which can be further integrated with the database. FastApi is used to handle API endpoints, and AioGram (in Python) is used for interacting with the Telegram API.",
+      "hint": "To check the API status, you can open the menu tab via the button on the dock or click the button.",
       "button": "Open Settings"
     },
-    "login": {
-      "header": "Login",
-      "title": "Here is your authorization code!",
-      "hint": "open this application in Telegram in {botname} and enter the code"
-    },
-    "addDevice":{
-      "header": "Add Device",
-      "title": "Add Device",
-      "hint": "enter the code displayed in the browser on the login page"
-    },
-    "need_auth": {
-      "header": "Authorization Required",
-      "title": "Not in Telegram",
-      "hint": "Please open this application inside the Telegram Mini App.",
-      "login_code": "Login with Code",
-      "button": "TgMiniApp"
-    },
-    "not_found": {
-      "code": {
-        "404": {
-          "header": "Not Found",
-          "title": "404",
-          "content": "Oops... The page was not found.",
-          "hint": "The page you are trying to access does not exist."
-        },
-        "401": {
-          "header": "Unauthorized Request",
-          "title": "401",
-          "content": "Please authorize",
-          "hint": "The page you are trying to access requires authorization!"
-        }
-      },
-      "button": "Return to Home",
-      "back_button": "Go Back"
-    },
-    "devices": {
-      "header": "Devices",
-      "title": "Devices",
-      "hint": "manage sessions",
-      "this_device": "This Device",
-      "active": "Active Sessions",
-      "link": "Link New Device",
-      "terminate": "Close all sessions except the current one",
-      "loading": "Checking with server...",
-      "dropdown": {
-        "type": "Authorization Method",
-        "ip": "IP Address",
-        "last_seen": "Last Seen Online",
-        "terminate": "Close Session",
-        "close": "Close"
+    "menu": {
+      "header": "Menu",
+      "title": "Menu",
+      "settings_tooltip": "Settings",
+      "empty": {
+        "title": "Menu page is now empty!",
+        "hint": "Add something by editing `frontend/scr/views/Menu.vue`"
       }
     },
     "settings": {
       "header": "Settings",
       "title": "Settings",
-      "hint": "Web Application Parameters",
-      "general": {
-        "name": "General",
-        "language": "Language"
-      },
-      "additional": {
-        "name": "Additional",
-        "authors": "Authors",
-        "devices": "Devices"
-      },
-      "danger": {
-        "name": "Danger Zone",
-        "logout": "Logout"
-      },
-      "end_hint": "made with ❤️ sht0rmx",
-      "badges": {
-        "api": {
-          "success": "API is operational!",
-          "error": "API Error (",
-          "unavailable": "API unavailable *"
-        },
-        "auth": {
-          "ok": "Authorization: {uname}",
-          "error": "Authorization: error"
-        }
-      }
+      "account": "Account",
+      "theme": "Theme",
+      "language": "Language",
+      "about": "About",
+      "version": "v{version}",
+      "logout": "Log Out"
+    },
+    "account": {
+      "header": "Account",
+      "username": "Username",
+      "avatar": "Avatar",
+      "first_name": "First name",
+      "second_name": "Second name",
+      "devises": "Devices",
+      "oauth": "OAuth",
+      "qr": "Login by QR-code"
+    },
+    "auth": {
+      "header": "Auth",
+      "title": "Login to Snipla",
+      "hint": "Scan this QR-code in authorized app",
+      "try_again": "Try again",
+      "error": "Error occured: {error}",
+      "locked_title": "Auth",
+      "locked_description": "To get access for this resourse you need authorise",
+      "login_button": "Login",
+      "back_button": "Back"
+    },
+    "accept_login": {
+      "header": "Accept login",
+      "title": "Accept login",
+      "hint": "Make sure that you are logging in to a trusted site and trust the device, as your account could fall into the hands of another person",
+      "accept": "Accept",
+      "close": "Close"
+    },
+    "not_found": {
+      "header": "Page not found",
+      "content": "OPSSS... Page not found",
+      "hint": "The page you are trying to access does not exist.",
+      "back_button": "Back to home"
     }
   },
   "components": {
     "dock": {
       "home": "Home",
-      "settings": "Settings"
+      "menu": "Menu"
+    },
+    "sidebar": {
+      "title": "Snipla",
+      "hint": "All-in-one template for fast dev.",
+      "expand_hint": "Expand the sidebar",
+      "auth": {
+        "title": "Log in to your account",
+        "hint": "To get all features of platform without restrictions",
+        "btn": "Log in"
+      }
     },
     "popup": {
       "text": "Update the app",
@@ -105,7 +86,7 @@
     "ru": "Russian",
     "en": "English"
   },
-  "other": {
+  "badges": {
     "load": "..."
   }
 }

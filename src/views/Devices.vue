@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Drawer, DrawerTrigger, DrawerContent, DrawerHeader,
@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/drawer'
 import List from '@/components/ui/list/List.vue'
 import { apiClient } from '@/api/client.js'
-import AddDevice from '@/views/AddDevice.vue'
+import { Html5Qrcode } from 'html5-qrcode'
 
 const devices = ref([
   { icon: 'ri-smartphone-line', name: 'Pixel 8', ip: '192.168.0.12', last: '2025-10-08 17:42' },
@@ -18,12 +18,49 @@ const devices = ref([
 const selectedDevice = ref(null)
 const drawerOpen = ref(false)
 const devicedata = ref<any>(null)
-const showAdd = ref(false)
 
+const showScanner = ref(false)
+let scanner: Html5Qrcode | null = null
 
-const handleScannerClose = () => {
-  showAdd.value = false
+const startScanner = async () => {
+  showScanner.value = true
+  await nextTick()
+  if (!scanner) scanner = new Html5Qrcode('scanner')
+  try {
+    await scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: 250 },
+      handleScan,
+      startScanner
+    )
+  } catch (err) {
+    console.error('Failed to start scanner', err)
+  }
 }
+
+const stopScanner = async () => {
+  if (scanner) {
+    await scanner.stop().catch(console.error)
+    scanner.clear()
+    scanner = null
+  }
+  showScanner.value = false
+}
+
+const handleScan = (decodedText: string) => {
+  try {
+    const url = new URL(decodedText)
+    const loginid = url.searchParams.get('loginid')
+    if (loginid) {
+      let scanned_device = atob(loginid)
+      stopScanner()
+
+    }
+  } catch (e) {
+    console.warn('QR parse error', e)
+  }
+}
+
 
 const openDrawer = (device: any) => {
   selectedDevice.value = device
@@ -46,6 +83,7 @@ const getCurrentDevice = async () => {
 }
 
 onMounted(() => getCurrentDevice())
+onUnmounted(() => stopScanner())
 </script>
 
 <template>
@@ -57,7 +95,7 @@ onMounted(() => getCurrentDevice())
     </div>
 
     <div class="flex w-full justify-center">
-      <Button class="w-full py-6" @click="showAdd = true">
+      <Button class="w-full py-6" @click="showScanner = true">
         <i class="ri-loader-3-line text-xl leading-none"></i>
         <span class="p-2 text-semibold">{{ $t('views.devices.link') }}</span>
       </Button>
@@ -130,14 +168,14 @@ onMounted(() => getCurrentDevice())
         </div>
       </DrawerContent>
     </Drawer>
-    <transition name="fade">
-      <AddDevice v-if="showAdd" @close="handleScannerClose" />
-    </transition>
+
+    <div v-if="showScanner" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      @click.self="stopScanner">
+      <div class="w-full max-w-md bg-card rounded-2xl shadow-xl p-6 mx-4">
+        <h2 class="text-xl font-semibold mb-4">Scan QR</h2>
+        <div id="scanner" class="w-full h-96"></div>
+        <Button class="mt-2 w-full" @click="stopScanner">Cancel</Button>
+      </div>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.35s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.fade-enter-to, .fade-leave-from { opacity: 1; }
-</style>
