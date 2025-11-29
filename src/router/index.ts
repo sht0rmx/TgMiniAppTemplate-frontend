@@ -4,10 +4,9 @@ import { i18n } from '@/locales/index.js'
 import HomeView from '@/views/Home.vue'
 import LoginView from '@/views/Login.vue'
 
-import { isTgEnv, WebApp, lockPage, backButton, authStstus } from '@/main.js'
+import { isTgEnv, WebApp, lockPage, backButton, authStstus, hiddenNav } from '@/main.js'
 import ErrorPage from '@/components/ErrorPage.vue'
 import MenuView from '@/views/Menu.vue'
-import path from 'path'
 import Settings from '@/views/Settings.vue'
 
 const routes = [
@@ -21,7 +20,7 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { titleKey: 'views.login.header', auth: false},
+    meta: { titleKey: 'views.auth.header', auth: false, noNav: true},
   },
   {
     path: '/menu',
@@ -61,12 +60,12 @@ router.afterEach((to) => {
   }
 
   if (to.path.split("/").length <= 2) {
-    if (isTgEnv && WebApp) { 
+    if (isTgEnv.value && WebApp) { 
       WebApp.BackButton.hide() 
       backButton.value = false 
     }
   } else {
-    if (isTgEnv && WebApp) { 
+    if (isTgEnv.value && WebApp) { 
       WebApp.BackButton.show() 
       backButton.value = true
     }
@@ -75,6 +74,14 @@ router.afterEach((to) => {
 
 router.beforeEach((to, _, next) => {
   let requireAuth = to.meta.auth 
+  let hideNav: String | any = to.meta.noNav
+
+  if (hideNav) {
+    hiddenNav.value = hideNav
+  } else {
+    hiddenNav.value = false
+  }
+
   if (requireAuth && authStstus && !to.path.includes("/login")) {
     lockPage.value = true
     return next()

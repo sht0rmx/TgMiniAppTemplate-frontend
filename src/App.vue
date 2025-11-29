@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import BottomDock from './components/BottomDock.vue'
-import AuthModal from './components/AuthModal.vue'
-import SplashScreen from './components/SplashScreen.vue'
-import { useRoute } from 'vue-router'
-import { hiddenNav, hiddenRoutes, isLoading, isTgEnv, lockPage } from '@/main.ts' 
+import { computed, watch } from 'vue'
+import BottomDock from '@/components/BottomDock.vue'
+import AuthModal from '@/components/AuthModal.vue'
+import SplashScreen from '@/components/SplashScreen.vue'
+import { hiddenNav, isLoading, isTgEnv, lockPage, technicalWork, unableAccessApi } from '@/main.ts'
 import Drawer from './components/drawer/Drawer.vue'
-
-const route = useRoute()
-
-const isDockHidden = computed(() => {
-  const name = route.name?.toString() || ''
-  return hiddenRoutes.includes(name)
-})
-
-hiddenNav.value = isDockHidden.value
+import { showPush } from './components/alert/index.ts'
+import Alert from './components/alert/Alert.vue'
 
 const containerClasses = computed(() => [
   'flex flex-col min-h-screen bg-base-200 overflow-hidden',
@@ -26,6 +18,16 @@ const mainClasses = computed(() => [
   'flex-1 flex overflow-y-auto',
   isTgEnv.value ? 'px-4 pt-2' : 'px-10 pt-4',
 ])
+
+watch(unableAccessApi, () => {
+  if (!technicalWork && unableAccessApi.value) {
+    showPush("splash.api_unavalible", "", "alert-warning", "ri-error-warning-line", false)
+  }
+});
+
+if (technicalWork) {
+  showPush("splash.construction", "", "alert-info", "ri-server-line", false)
+}
 </script>
 
 <template>
@@ -43,7 +45,9 @@ const mainClasses = computed(() => [
       <BottomDock v-if="!hiddenNav" />
     </div>
 
-    <AuthModal/>
+    <AuthModal />
+    <Alert />
+
   </Drawer>
 </template>
 

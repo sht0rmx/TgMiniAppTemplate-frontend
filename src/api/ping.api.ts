@@ -1,12 +1,15 @@
-import apiClientInst, { type EmptyResponse } from './api';
+import apiClientInst from './api'
 
 export class PingService {
-    /** GET /api/v1/ping - Check health of api */
+  private static AUTH_BASE = '/api/v1'
+  /** GET /api/v1/ping - Check health of api */
   static async pingPong(): Promise<boolean> {
-    const resp = await  apiClientInst.get('/ping');
-    if (resp.status !== 200) {
+    try {
+      const resp = await apiClientInst.get(`${this.AUTH_BASE}/ping`)
+      if (resp.status !== 200) {
         return false
-    }
-    return true
+      }
+      return true
+    } catch (e) { return false }
   }
 }

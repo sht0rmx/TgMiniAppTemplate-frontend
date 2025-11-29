@@ -10,11 +10,6 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs'
 const fpPromise = FingerprintJS.load()
 const API_URL = import.meta.env.VITE_API_URL as string
 
-interface RefreshResponse {
-  code: number
-  access?: string
-}
-
 export interface EmptyResponse {
   detail?: string
 }
@@ -33,6 +28,7 @@ class Client {
       baseURL: API_URL,
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' },
+      timeout: 5000,
     })
 
     this.setupInterceptors()
@@ -72,11 +68,11 @@ class Client {
     )
   }
 
-  private async refreshTokens(): Promise<RefreshResponse> {
+  async refreshTokens(): Promise<boolean> {
     const res = await this.axios.get('/api/v1/auth/token/get-tokens')
     if (res.status === 200) {
       this.setAccessToken(res.data.access_token)
-      return { access: res.data.access_token, code: res.status }
+      return true
     }
     throw new Error('Invalid refresh token')
   }

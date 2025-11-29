@@ -45,7 +45,11 @@
       "locked_title": "Auth",
       "locked_description": "To get access for this resourse you need authorise",
       "login_button": "Login",
-      "back_button": "Back"
+      "back_button": "Back",
+      "initdata": "Analysing InitData",
+      "miniapp_error": "Error while analysing initData",
+      "login_success": "Login sucessful!",
+      "login_rejected": "QR code was rejected!"
     },
     "accept_login": {
       "header": "Accept login",
@@ -88,5 +92,9 @@
   },
   "badges": {
     "load": "..."
+  },
+  "splash": {
+    "construction": "Now on server technical works! Wait some time.",
+    "api_unavalible": "Sorry, we cant connect to our servers"
   }
 }

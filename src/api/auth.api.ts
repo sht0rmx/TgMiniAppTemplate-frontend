@@ -141,15 +141,19 @@ export class AuthService {
     return true
   }
 
-  /** GET /api/v1/auth/token/recreate-tokens - Get Refresh Token (Refresh Session) */
+  /** GET /api/v1/auth/token/recreate-tokens - Get Refresh Token + Access token */
   static async recreateTokens(): Promise<boolean> {
-    const resp = await apiClientInst.get(`${this.AUTH_BASE}/token/recreate-tokens`)
-    if (resp.status == 200) {
+    try {
+      const resp = await apiClientInst.get(`${this.AUTH_BASE}/token/recreate-tokens`)
+      if (resp.status == 200) {
         let data: AccessResponse = resp.data
         apiClient.setAccessToken(data.access_token)
         return true
+      }
+      return false
+    } catch (e) {
+      return false
     }
-    return false
   }
 
   /** GET /api/v1/auth/token/revoke - Revoke Refresh Session */

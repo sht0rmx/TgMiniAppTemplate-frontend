@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { AuthService } from '@/api/auth.api';
 import Header from '@/components/Header.vue';
+
+console.log(AuthService.check())
 </script>
 
 <template>

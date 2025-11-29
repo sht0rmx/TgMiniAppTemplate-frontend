@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { hiddenNav } from '@/main'
 import DrawerMenu from '@/components/drawer/DrawerMenu.vue'
+import { hiddenNav } from '@/main';
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import DrawerMenu from '@/components/drawer/DrawerMenu.vue'
       <slot />
     </div>
 
-    <div class="drawer-side overflow-visible">
+    <div v-show="!hiddenNav" class="drawer-side overflow-visible">
       <label for="sidebar" class="drawer-overlay"></label>
       <DrawerMenu />
     </div>
