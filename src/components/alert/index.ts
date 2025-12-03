@@ -1,4 +1,4 @@
-import { ref } from "vue"
+import { ref } from 'vue'
 
 const lifetime = 3000
 
@@ -15,10 +15,10 @@ let counter = 0
 
 export function showPush(
   msg: string,
-  subKey: string = "",
-  type: string = "alert-info",
-  icon: string = "ri-box-3-line",
-  autoclose: boolean = true
+  subKey: string = '',
+  type: string = 'alert-info',
+  icon: string = 'ri-box-3-line',
+  autoclose: boolean = true,
 ) {
   const id = ++counter
 
@@ -27,12 +27,12 @@ export function showPush(
     msg,
     subKey,
     type,
-    icon
+    icon,
   })
 
   if (autoclose) {
     setTimeout(() => {
-      alerts.value = alerts.value.filter(a => a.id !== id)
+      alerts.value = alerts.value.filter((a) => a.id !== id)
     }, lifetime)
   }
 }

@@ -21,21 +21,20 @@ const mainClasses = computed(() => [
 
 watch(unableAccessApi, () => {
   if (!technicalWork && unableAccessApi.value) {
-    showPush("splash.api_unavalible", "", "alert-warning", "ri-error-warning-line", false)
+    showPush('splash.api_unavalible', '', 'alert-warning', 'ri-error-warning-line', false)
   }
-});
+})
 
 if (technicalWork) {
-  showPush("splash.construction", "", "alert-info", "ri-server-line", false)
+  showPush('splash.construction', '', 'alert-info', 'ri-server-line', false)
 }
 </script>
 
 <template>
   <Drawer>
-    <SplashScreen v-if="isLoading" />
+    <SplashScreen v-show="isLoading" />
 
-    <div v-else :class="containerClasses" class="app-container lg:pb-4">
-
+    <div :class="containerClasses" class="app-container lg:pb-4">
       <main :class="mainClasses">
         <div class="w-full">
           <router-view />
@@ -47,7 +46,6 @@ if (technicalWork) {
 
     <AuthModal />
     <Alert />
-
   </Drawer>
 </template>
 

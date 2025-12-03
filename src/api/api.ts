@@ -6,6 +6,7 @@ import axios, {
 } from 'axios'
 import router from '@/router'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
+import { showPush } from '@/components/alert'
 
 const fpPromise = FingerprintJS.load()
 const API_URL = import.meta.env.VITE_API_URL as string
@@ -51,19 +52,24 @@ class Client {
           !isTokensEndpoint
         ) {
           original._retry = true
+
           try {
             await this.refreshTokens()
+
+            const cloned = {
+              ...original,
+              headers: { ...original.headers },
+            }
+            delete cloned._retry
+
+            return this.axios(cloned)
           } catch (e) {
-            console.warn('Refresh failed:', e)
-            await router.push('/login')
+            console.warn('refresh failed', e)
             return Promise.reject(e)
           }
-        } else if (err.response?.status === 401) {
-          console.error('Error response 401:', err.response.data)
-        } else {
-          console.error('Error response:', err)
         }
-        return null
+
+        return Promise.reject(err)
       },
     )
   }
@@ -74,7 +80,7 @@ class Client {
       this.setAccessToken(res.data.access_token)
       return true
     }
-    throw new Error('Invalid refresh token')
+    return false
   }
 
   getAccessToken(): string | null {
@@ -97,6 +103,7 @@ class Client {
     const result = await fp.get()
 
     this.fingerprint = result.visitorId
+    this.axios.defaults.headers.common['Fingerprint'] = result.visitorId
     this.axios.defaults.headers.common['Fingerprint'] = result.visitorId
     return result.visitorId
   }

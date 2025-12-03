@@ -32,9 +32,10 @@ export const nav_items = [
 
 if (window?.Telegram?.WebApp) {
   WebApp = window.Telegram.WebApp
-  const initDataRaw = WebApp.initData || ''
+  const data = WebApp.initDataUnsafe
+  const valid = data && data.hash && data.user?.id
 
-  if (initDataRaw.length > 0) {
+  if (valid) {
     isTgEnv.value = true
     console.log('Telegram environment detected')
 
@@ -51,12 +52,13 @@ if (window?.Telegram?.WebApp) {
     WebApp.SettingsButton.onClick(() => router.push('/menu/settings'))
   } else {
     isTgEnv.value = false
-    console.warn('Telegram.WebApp found, but no initData (probably opened in browser)')
+    console.warn('Telegram.WebApp exists, but initData is not valid (opened in browser)')
   }
 } else {
   isTgEnv.value = false
   console.warn('Not inside Telegram, fallback mode')
 }
+
 
 async function authInit(): Promise<boolean> {
   await apiClient.setFingerprint()
@@ -67,28 +69,18 @@ async function authInit(): Promise<boolean> {
   }
 
   let ac = await apiClient.getAccessToken()
-  if (!ac && isTgEnv.value) {
+  if (!ac) {
     router.push({
       path: '/login',
       query: {
         redirect: router.currentRoute.value.path,
-        auth_method: 'Telegram',
-      },
-    })
-    return false
-  } else if (!ac) {
-    router.push({
-      path: '/login',
-      query: {
-        redirect: router.currentRoute.value.path,
-        auth_method: 'WebApp',
       },
     })
     return false
   } else if (ac) {
     let status = await AuthService.check()
     if (!status) {
-        return false
+      return false
     }
     return true
   }

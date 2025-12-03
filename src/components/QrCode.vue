@@ -10,7 +10,7 @@ import QRCode from 'qrcode'
 
 const props = defineProps({
   url: { type: String, required: true },
-  size: { type: Number, default: 192 }
+  size: { type: Number, default: 192 },
 })
 
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -28,7 +28,7 @@ async function draw(val: string) {
     await QRCode.toCanvas(canvas.value, val.trim(), {
       width: props.size,
       margin: 1,
-      color: { dark: '#000', light: '#fff' }
+      color: { dark: '#000', light: '#fff' },
     })
   } catch (err) {
     console.error('Failed to draw QR:', err)
@@ -36,5 +36,8 @@ async function draw(val: string) {
 }
 
 onMounted(() => nextTick(() => draw(props.url)))
-watch(() => props.url, (v) => nextTick(() => draw(v)))
+watch(
+  () => props.url,
+  (v) => nextTick(() => draw(v)),
+)
 </script>

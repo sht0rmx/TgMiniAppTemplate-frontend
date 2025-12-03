@@ -2,8 +2,14 @@
 import { ref, onMounted, nextTick, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
-  Drawer, DrawerTrigger, DrawerContent, DrawerHeader,
-  DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
 } from '@/components/ui/drawer'
 import List from '@/components/ui/list/List.vue'
 import { apiClient } from '@/api/client.js'
@@ -31,7 +37,7 @@ const startScanner = async () => {
       { facingMode: 'environment' },
       { fps: 10, qrbox: 250 },
       handleScan,
-      startScanner
+      startScanner,
     )
   } catch (err) {
     console.error('Failed to start scanner', err)
@@ -54,13 +60,11 @@ const handleScan = (decodedText: string) => {
     if (loginid) {
       let scanned_device = atob(loginid)
       stopScanner()
-
     }
   } catch (e) {
     console.warn('QR parse error', e)
   }
 }
-
 
 const openDrawer = (device: any) => {
   selectedDevice.value = device
@@ -105,12 +109,14 @@ onUnmounted(() => stopScanner())
       <button
         v-if="devicedata"
         class="list-item"
-        @click="openDrawer({
-          icon: `ri-${devicedata.info.os}-line`,
-          name: devicedata.info.dev || 'Unknown',
-          ip: devicedata.ip,
-          last: devicedata.lastUsed
-        })"
+        @click="
+          openDrawer({
+            icon: `ri-${devicedata.info.os}-line`,
+            name: devicedata.info.dev || 'Unknown',
+            ip: devicedata.ip,
+            last: devicedata.lastUsed,
+          })
+        "
       >
         <i :class="[`ri-${devicedata.info.os}-line`, 'text-2xl mr-3']"></i>
         <div class="flex-1 text-sm">
@@ -169,8 +175,11 @@ onUnmounted(() => stopScanner())
       </DrawerContent>
     </Drawer>
 
-    <div v-if="showScanner" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      @click.self="stopScanner">
+    <div
+      v-if="showScanner"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      @click.self="stopScanner"
+    >
       <div class="w-full max-w-md bg-card rounded-2xl shadow-xl p-6 mx-4">
         <h2 class="text-xl font-semibold mb-4">Scan QR</h2>
         <div id="scanner" class="w-full h-96"></div>

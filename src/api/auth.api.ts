@@ -2,7 +2,6 @@ import { useUserStore } from '@/stores/user'
 import apiClientInst, { apiClient, type EmptyResponse } from './api'
 import router from '@/router'
 
-
 const API_URL = import.meta.env.VITE_API_URL as string
 const FRONT_URL = import.meta.env.VITE_FRONTEND_URL as string
 
@@ -11,12 +10,12 @@ export interface WebAppLoginRequest {
 }
 
 export interface RecoveryResponse {
-    code: string
-    detail?: string
+  code: string
+  detail?: string
 }
 
 export interface RecoveryRequest {
-    recovery_code: string
+  recovery_code: string
 }
 
 export interface AccessResponse {
@@ -113,7 +112,7 @@ export class AuthService {
   static async checkLogin(loginId: string): Promise<boolean> {
     const resp = await apiClientInst.get(`${this.AUTH_BASE}/login/search/${loginId}`)
     if (resp.status !== 200) {
-        return false
+      return false
     }
     return true
   }
@@ -122,7 +121,7 @@ export class AuthService {
   static async validateLogin(loginId: string): Promise<boolean> {
     const resp = await apiClientInst.get(`${this.AUTH_BASE}/login/accept/${loginId}`)
     if (resp.status !== 200) {
-        return false
+      return false
     }
     return true
   }
@@ -160,17 +159,17 @@ export class AuthService {
   static async revokeRefreshSession(): Promise<boolean> {
     const resp = await apiClientInst.get(`${this.AUTH_BASE}/token/revoke`)
     if (resp.status !== 200) {
-        return false
+      return false
     }
     return true
   }
 
   /** GET /api/v1/auth/token/recovery - Generate Recovery Code */
-  static async generateRecovery(): Promise<RecoveryResponse|boolean> {
+  static async generateRecovery(): Promise<RecoveryResponse | boolean> {
     const resp = await apiClientInst.get(`${this.AUTH_BASE}/token/recovery`)
     if (resp.status == 200) {
-        let data: RecoveryResponse = resp.data
-        return data
+      let data: RecoveryResponse = resp.data
+      return data
     }
     return false
   }
@@ -179,7 +178,7 @@ export class AuthService {
   static async transferUser(data: RecoveryRequest): Promise<boolean> {
     const resp = await apiClientInst.post(`${this.AUTH_BASE}/token/transfer`, data)
     if (resp.status !== 200) {
-        return false
+      return false
     }
     return true
   }

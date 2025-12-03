@@ -14,25 +14,25 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomeView,
-    meta: { titleKey: 'views.home.header', auth: false, noTopSafeArea: true},
+    meta: { titleKey: 'views.home.header', auth: false, noTopSafeArea: true },
   },
   {
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { titleKey: 'views.auth.header', auth: false, noNav: true},
+    meta: { titleKey: 'views.auth.header', auth: false, noNav: true },
   },
   {
     path: '/menu',
     name: 'Menu',
     component: MenuView,
-    meta: { titleKey: 'views.menu.header', auth: false},
+    meta: { titleKey: 'views.menu.header', auth: false },
   },
   {
-    path: "/menu/settings",
-    name: "Settings",
+    path: '/menu/settings',
+    name: 'Settings',
     component: Settings,
-    meta: { titleKey: 'views.settings.header', auth: false},
+    meta: { titleKey: 'views.settings.header', auth: false },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -43,7 +43,7 @@ const routes = [
       desc: i18n.global.t('views.not_found.content'),
       hint: i18n.global.t('views.not_found.hint'),
     },
-    meta: { titleKey: 'views.not_found.header', auth: false},
+    meta: { titleKey: 'views.not_found.header', auth: false },
   },
 ]
 
@@ -59,21 +59,21 @@ router.afterEach((to) => {
     document.title = i18n.global.t(key)
   }
 
-  if (to.path.split("/").length <= 2) {
-    if (isTgEnv.value && WebApp) { 
-      WebApp.BackButton.hide() 
-      backButton.value = false 
+  if (to.path.split('/').length <= 2) {
+    if (isTgEnv.value && WebApp) {
+      WebApp.BackButton.hide()
+      backButton.value = false
     }
   } else {
-    if (isTgEnv.value && WebApp) { 
-      WebApp.BackButton.show() 
+    if (isTgEnv.value && WebApp) {
+      WebApp.BackButton.show()
       backButton.value = true
     }
   }
 })
 
 router.beforeEach((to, _, next) => {
-  let requireAuth = to.meta.auth 
+  let requireAuth = to.meta.auth
   let hideNav: String | any = to.meta.noNav
 
   if (hideNav) {
@@ -82,7 +82,7 @@ router.beforeEach((to, _, next) => {
     hiddenNav.value = false
   }
 
-  if (requireAuth && authStstus && !to.path.includes("/login")) {
+  if (requireAuth && authStstus && !to.path.includes('/login')) {
     lockPage.value = true
     return next()
   }

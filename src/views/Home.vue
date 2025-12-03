@@ -1,5 +1,4 @@
-<script setup lang="js">
-</script>
+<script setup lang="js"></script>
 
 <template>
   <div class="lg:h-full flex flex-col items-center justify-center space-y-3">
@@ -9,8 +8,8 @@
       {{ $t('views.home.description') }}
     </p>
     <button class="btn btn-primary" @click="$router.push('/menu/settings')">
-        {{ $t('views.home.button') }}
-    </Button>
+      {{ $t('views.home.button') }}
+    </button>
     <p class="text-sm opacity-30 max-w-xs text-center my-1">
       {{ $t('views.home.hint') }}
     </p>

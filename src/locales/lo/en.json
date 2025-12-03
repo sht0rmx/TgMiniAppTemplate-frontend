@@ -49,7 +49,9 @@
       "initdata": "Analysing InitData",
       "miniapp_error": "Error while analysing initData",
       "login_success": "Login sucessful!",
-      "login_rejected": "QR code was rejected!"
+      "login_rejected": "QR code was rejected!",
+      "refresh": "Refreshing tokens",
+      "qr_gen": "Generating qr-code"
     },
     "accept_login": {
       "header": "Accept login",

@@ -34,8 +34,18 @@ export default {
         color="neutral"
         variant="outline"
         :actions="[
-          { label: $t('components.popup.update'), variant: 'solid', color: 'accent', onClick: update },
-          { label: $t('components.popup.close'), variant: 'subtle', color: 'neutral', onClick: close }
+          {
+            label: $t('components.popup.update'),
+            variant: 'solid',
+            color: 'accent',
+            onClick: update,
+          },
+          {
+            label: $t('components.popup.close'),
+            variant: 'subtle',
+            color: 'neutral',
+            onClick: close,
+          },
         ]"
         class="max-w-md w-full"
       />
