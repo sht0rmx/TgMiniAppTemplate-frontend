@@ -4,9 +4,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import router from '@/router'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
-import { showPush } from '@/components/alert'
 
 const fpPromise = FingerprintJS.load()
 const API_URL = import.meta.env.VITE_API_URL as string
@@ -114,6 +112,7 @@ class Client {
 }
 
 export const apiClient = new Client()
+await apiClient.setFingerprint()
 
 export const apiClientInst = apiClient.getAxiosInstance()
 export default apiClientInst

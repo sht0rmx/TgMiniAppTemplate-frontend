@@ -20,11 +20,12 @@
       "header": "Settings",
       "title": "Settings",
       "account": "Account",
-      "theme": "Theme",
+      "appearance": "Appearance",
       "language": "Language",
+      "devices": "Devices",
       "about": "About",
-      "version": "v{version}",
-      "logout": "Log Out"
+      "logout": "Log out",
+      "api_keys": "Api keys"
     },
     "account": {
       "header": "Account",
@@ -32,9 +33,27 @@
       "avatar": "Avatar",
       "first_name": "First name",
       "second_name": "Second name",
-      "devises": "Devices",
       "oauth": "OAuth",
       "qr": "Login by QR-code"
+    },
+    "devices": {
+      "header": "Devices",
+      "title": "Devices",
+      "hint": "Here you can view and manage the devices that have access to your account.",
+      "this_device": "Current device",
+      "active": "Active sessions",
+      "link": "Scan QR",
+      "dropdown": {
+        "ip": "IP adress:",
+        "last_seen": "Last active:",
+        "terminate": "Terminate session"
+      },
+      "no_devices": "No authorized devices found.",
+      "scan": {
+        "title": "Scan QR",
+        "close": "Close",
+        "error": "Failed to load camera"
+      }
     },
     "auth": {
       "header": "Auth",
@@ -51,7 +70,9 @@
       "login_success": "Login sucessful!",
       "login_rejected": "QR code was rejected!",
       "refresh": "Refreshing tokens",
-      "qr_gen": "Generating qr-code"
+      "qr_gen": "Generating qr-code",
+      "without_login": "Login was skipped. For unlock all features go to /login",
+      "skip_login": "Skip login"
     },
     "accept_login": {
       "header": "Accept login",
@@ -98,5 +119,13 @@
   "splash": {
     "construction": "Now on server technical works! Wait some time.",
     "api_unavalible": "Sorry, we cant connect to our servers"
+  },
+  "app": {
+    "ui": {
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "version": "v{version}"
   }
 }

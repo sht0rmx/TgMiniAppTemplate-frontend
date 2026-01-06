@@ -3,7 +3,7 @@ import { apiClient } from '@/api/api'
 import { AuthService } from '@/api/auth.api'
 import { showPush } from '@/components/alert'
 import QrCode from '@/components/QrCode.vue'
-import { isLoading, isTgEnv, WebApp } from '@/main'
+import { authStstus, isLoading, isTgEnv, WebApp } from '@/main'
 import { onMounted, ref, type Ref, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -18,10 +18,7 @@ let authPromise: Promise<unknown> | null = null
 let sseCancel: (() => void) | null = null
 let loginId: string = ''
 
-let redirect_to: string | any = route.query.redirect
-if (redirect_to === "" || redirect_to === "/login") {
-  redirect_to = "/"
-}
+let redirect_to: string = '/'
 
 let timer: number | null = null
 const QR_LIFETIME = 5 * 60 * 1000
@@ -45,7 +42,9 @@ async function LoginTg() {
     enableSpinner.value = false
   }
 
-  if (res) { return true }
+  if (res) {
+    return true
+  }
   return false
 }
 
@@ -64,7 +63,9 @@ async function startQR(): Promise<any> {
   authPromise = resp.authPromise
   sseCancel = resp.cancelSse
 
-  timer = window.setTimeout(() => { stopQR() }, QR_LIFETIME)
+  timer = window.setTimeout(() => {
+    stopQR()
+  }, QR_LIFETIME)
 
   authPromise
     ?.then((token) => {
@@ -81,29 +82,51 @@ async function startQR(): Promise<any> {
 }
 
 async function successPush() {
+  isLoading.value = false
+  let state = AuthService.check()
+  if (!state) {
+    showPush('views.auth.login_error', '', 'alert-danger', 'ri-close-line')
+    return null
+  }
   showPush('views.auth.login_success', '', 'alert-success', 'ri-check-line')
   router.push(redirect_to)
-  isLoading.value = false
   return null
 }
 
 async function startLogin() {
+  try {
+    redirect_to = String(route.query.redirect)
+  } catch (e) {
+    redirect_to = '/'
+  }
+
+  if (redirect_to === '' || redirect_to === '/login') {
+    redirect_to = '/'
+  }
+
   let res = false
   isLoading.value = true
 
   try {
-    console.log("refreshing", redirect_to)
+    console.log('refreshing', redirect_to)
     res = await apiClient.refreshTokens()
-  } catch { null }
+  } catch {
+    null
+  }
 
-  if (res) { await successPush() }
-  else if (isTgEnv.value) {
-    if (await LoginTg()) { await successPush() } 
-    else { showPush('views.auth.miniapp_error', '', 'alert-warning', 'ri-error-warning-line') }
-  } 
-  else { 
-    await startQR() 
-    window.setTimeout(() => {isLoading.value = false}, 200)
+  if (res) {
+    await successPush()
+  } else if (isTgEnv.value) {
+    if (await LoginTg()) {
+      await successPush()
+    } else {
+      showPush('views.auth.miniapp_error', '', 'alert-warning', 'ri-error-warning-line')
+    }
+  } else {
+    await startQR()
+    window.setTimeout(() => {
+      isLoading.value = false
+    }, 200)
   }
 }
 
@@ -125,7 +148,8 @@ onBeforeUnmount(() => stopQR())
             <button
               v-if="qrStarted"
               class="btn btn-small btn-accent btn-soft flex flex-row items-center gap-1"
-              @click="startLogin()">
+              @click="startLogin()"
+            >
               <i class="ri-reset-right-line text-base"></i>
               <span class="text-base">{{ $t('views.auth.try_again') }}</span>
             </button>
@@ -148,4 +172,9 @@ onBeforeUnmount(() => stopQR())
       </div>
     </div>
   </div>
+  <footer class="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4">
+    <button class="btn btn-ghost btn-sm" @click="$router.push('/')">
+      <span class="uppercase tracking-widest">{{ $t('views.auth.skip_login') }}</span>
+    </button>
+  </footer>
 </template>

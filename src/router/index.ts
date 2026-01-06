@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { type RouteRecordRaw } from 'vue-router'
 import { i18n } from '@/locales/index.js'
 
 import HomeView from '@/views/Home.vue'
 import LoginView from '@/views/Login.vue'
 
-import { isTgEnv, WebApp, lockPage, backButton, authStstus, hiddenNav } from '@/main.js'
-import ErrorPage from '@/components/ErrorPage.vue'
+import { isTgEnv, WebApp, authRequired, backButton, hiddenNav } from '@/main.js'
+import ErrorPage from '@/views/NotFound.vue'
 import MenuView from '@/views/Menu.vue'
 import Settings from '@/views/Settings.vue'
+import Devices from '@/views/Devices.vue'
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
@@ -35,14 +37,15 @@ const routes = [
     meta: { titleKey: 'views.settings.header', auth: false },
   },
   {
+    path: '/menu/settings/devices',
+    name: 'Devices',
+    component: Devices,
+    meta: { titleKey: 'views.devices.header', auth: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: ErrorPage,
-    props: {
-      code: '404',
-      desc: i18n.global.t('views.not_found.content'),
-      hint: i18n.global.t('views.not_found.hint'),
-    },
     meta: { titleKey: 'views.not_found.header', auth: false },
   },
 ]
@@ -53,12 +56,6 @@ const router = createRouter({
 })
 
 router.afterEach((to) => {
-  const key = to.meta.titleKey
-
-  if (key) {
-    document.title = i18n.global.t(key)
-  }
-
   if (to.path.split('/').length <= 2) {
     if (isTgEnv.value && WebApp) {
       WebApp.BackButton.hide()
@@ -73,7 +70,7 @@ router.afterEach((to) => {
 })
 
 router.beforeEach((to, _, next) => {
-  let requireAuth = to.meta.auth
+  authRequired.value = to.meta.auth as boolean
   let hideNav: String | any = to.meta.noNav
 
   if (hideNav) {
@@ -81,12 +78,6 @@ router.beforeEach((to, _, next) => {
   } else {
     hiddenNav.value = false
   }
-
-  if (requireAuth && authStstus && !to.path.includes('/login')) {
-    lockPage.value = true
-    return next()
-  }
-  lockPage.value = false
   return next()
 })
 

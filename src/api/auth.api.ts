@@ -1,6 +1,7 @@
 import { useUserStore } from '@/stores/user'
 import apiClientInst, { apiClient, type EmptyResponse } from './api'
 import router from '@/router'
+import { authStstus } from '@/main'
 
 const API_URL = import.meta.env.VITE_API_URL as string
 const FRONT_URL = import.meta.env.VITE_FRONTEND_URL as string
@@ -133,10 +134,12 @@ export class AuthService {
 
     if (!res || res.status !== 200) {
       store.clearUser()
+      authStstus.value = false
       await router.push('/login')
       return false
     }
     store.setUser(res.data.user)
+    authStstus.value = true
     return true
   }
 

@@ -1,7 +1,7 @@
 import '@/assets/main.css'
 import 'remixicon/fonts/remixicon.css'
 
-import { createApp, ref, type Ref } from 'vue'
+import { compile, computed, createApp, ref, type Ref } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
@@ -10,20 +10,46 @@ import { i18n } from './locales'
 import { apiClient } from './api/api'
 import { PingService } from './api/ping.api'
 import { AuthService } from './api/auth.api'
+import { showPush } from './components/alert'
 
 export let isTgEnv: Ref<boolean> = ref(false)
 export let WebApp: import('telegram-web-app').WebApp | null = null
 export let isLoading: Ref<boolean> = ref(true)
 
 export let authStstus: Ref<boolean> = ref(false)
-export let lockPage: Ref<boolean> = ref(false)
+export let authRequired: Ref<boolean> = ref(false)
+export let lockPage: Ref<boolean> = computed(
+  () => authRequired && !authStstus && router.currentRoute.value.fullPath !== '/login',
+)
 
 export let hiddenNav: Ref<boolean> = ref(false)
 export let backButton: Ref<boolean> = ref(false)
 
+export type Theme = 'system' | 'default' | 'dim' | 'nord'
+
+export const currentTheme: Ref<Theme> = ref('system')
+const THEME_KEY = 'theme'
+
 //Splash Screen statuses
 export let technicalWork: boolean = import.meta.env.VITE_CONSTRUCTION_MODE as boolean
 export let unableAccessApi: Ref<boolean> = ref(false)
+
+export const applyTheme = (theme: Theme) => {
+  const resolved =
+    theme === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dim'
+        : 'default'
+      : theme
+
+  document.documentElement.setAttribute('data-theme', resolved)
+}
+
+export const setTheme = (theme: Theme) => {
+  currentTheme.value = theme
+  localStorage.setItem(THEME_KEY, theme)
+  applyTheme(theme)
+}
 
 export const nav_items = [
   { icon: 'ri-home-line', label: 'components.dock.home', to: '/' },
@@ -59,9 +85,7 @@ if (window?.Telegram?.WebApp) {
   console.warn('Not inside Telegram, fallback mode')
 }
 
-
 async function authInit(): Promise<boolean> {
-  await apiClient.setFingerprint()
   let res = await PingService.pingPong()
   if (!res) {
     unableAccessApi.value = true
@@ -70,12 +94,17 @@ async function authInit(): Promise<boolean> {
 
   let ac = await apiClient.getAccessToken()
   if (!ac) {
-    router.push({
-      path: '/login',
-      query: {
-        redirect: router.currentRoute.value.path,
-      },
-    })
+    if (router.currentRoute.value.path === '/' || isTgEnv.value) {
+      router.push({
+        path: '/login',
+        query: {
+          redirect: router.currentRoute.value.path,
+        },
+      })
+    } else {
+      showPush('views.auth.without_login', '', 'alert-warning', 'ri-error-warning-line')
+    }
+
     return false
   } else if (ac) {
     let status = await AuthService.check()
@@ -94,6 +123,9 @@ app.use(router)
 app.use(i18n)
 
 app.mount('#app')
+
+const saved = (localStorage.getItem(THEME_KEY) as Theme) || 'system'
+setTheme(saved)
 
 authStstus.value = await authInit()
 
