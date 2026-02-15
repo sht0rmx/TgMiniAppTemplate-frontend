@@ -97,11 +97,20 @@ class Client {
   async setFingerprint(): Promise<string> {
     if (this.fingerprint) return this.fingerprint
 
+    const STORAGE_KEY = 'device_fingerprint'
+    const stored = localStorage.getItem(STORAGE_KEY)
+
+    if (stored) {
+      this.fingerprint = stored
+      this.axios.defaults.headers.common['Fingerprint'] = stored
+      return stored
+    }
+
     const fp = await fpPromise
     const result = await fp.get()
 
+    localStorage.setItem(STORAGE_KEY, result.visitorId)
     this.fingerprint = result.visitorId
-    this.axios.defaults.headers.common['Fingerprint'] = result.visitorId
     this.axios.defaults.headers.common['Fingerprint'] = result.visitorId
     return result.visitorId
   }

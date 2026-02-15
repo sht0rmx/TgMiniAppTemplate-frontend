@@ -1,6 +1,10 @@
 import '@/assets/main.css'
 import 'remixicon/fonts/remixicon.css'
 
+if (import.meta.env.DEV) {
+  import('eruda').then((eruda) => eruda.default.init())
+}
+
 import { compile, computed, createApp, ref, type Ref } from 'vue'
 import { createPinia } from 'pinia'
 
@@ -18,8 +22,8 @@ export let isLoading: Ref<boolean> = ref(true)
 
 export let authStstus: Ref<boolean> = ref(false)
 export let authRequired: Ref<boolean> = ref(false)
-export let lockPage: Ref<boolean> = computed(
-  () => authRequired && !authStstus && router.currentRoute.value.fullPath !== '/login',
+export let lockPage = computed(
+  () => authRequired.value && !authStstus.value && router.currentRoute.value.fullPath !== '/login',
 )
 
 export let hiddenNav: Ref<boolean> = ref(false)
@@ -92,27 +96,39 @@ async function authInit(): Promise<boolean> {
     return false
   }
 
-  let ac = await apiClient.getAccessToken()
+  // Try to use existing in-memory token or refresh from cookie
+  let ac = apiClient.getAccessToken()
   if (!ac) {
-    if (router.currentRoute.value.path === '/' || isTgEnv.value) {
-      router.push({
-        path: '/login',
-        query: {
-          redirect: router.currentRoute.value.path,
-        },
-      })
-    } else {
-      showPush('views.auth.without_login', '', 'alert-warning', 'ri-error-warning-line')
+    try {
+      const refreshed = await apiClient.refreshTokens()
+      if (refreshed) {
+        ac = apiClient.getAccessToken()
+      }
+    } catch {
+      // refresh failed, no valid session
     }
-
-    return false
-  } else if (ac) {
-    let status = await AuthService.check()
-    if (!status) {
-      return false
-    }
-    return true
   }
+
+  if (ac) {
+    const status = await AuthService.check()
+    if (status) {
+      return true
+    }
+    return false
+  }
+
+  // No token — redirect to login
+  if (router.currentRoute.value.path === '/' || isTgEnv.value) {
+    router.push({
+      path: '/login',
+      query: {
+        redirect: router.currentRoute.value.path,
+      },
+    })
+  } else {
+    showPush('views.auth.without_login', '', 'alert-warning', 'ri-error-warning-line')
+  }
+
   return false
 }
 

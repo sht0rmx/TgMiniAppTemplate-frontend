@@ -9,10 +9,18 @@ import MenuContent from '@/components/menu/Content.vue'
 import MenuDropdown from '@/components/menu/Dropdown.vue'
 import { useI18n } from 'vue-i18n'
 import { supported } from '@/locales'
-import { isTgEnv, currentTheme, setTheme, type Theme } from '@/main'
+import { authStstus, isTgEnv, currentTheme, setTheme, type Theme } from '@/main'
 
-const { locale, t } = useI18n()
+const { locale, t, d } = useI18n()
 const localeValue = ref(locale.value)
+
+const appVersion = __APP_VERSION__
+const buildHash = __BUILD_HASH__
+const buildDate = new Date(__BUILD_DATE__).toLocaleDateString(locale.value, {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+})
 
 const themes: { id: Theme; label: string; icon: string }[] = [
   { id: 'system', label: t('app.ui.system'), icon: 'ri-computer-line' },
@@ -46,8 +54,9 @@ const logout = async () => {
 <template>
   <Header :title="t('views.settings.title')" />
 
-  <div class="flex flex-col gap-6 p-4">
+  <div class="flex flex-col gap-6 px-0">
     <LoginCard />
+
     <Menu>
       <MenuDropdown>
         <MenuButton
@@ -118,25 +127,40 @@ const logout = async () => {
     </Menu>
 
     <Menu>
-      <MenuButton :text="$t('views.settings.account')" icon="ri-user-4-line" />
       <MenuButton
+        v-if="authStstus"
+        :text="$t('views.settings.account')"
+        icon="ri-user-4-line"
+        @click="$router.push('/menu/settings/account')"
+      />
+      <MenuButton
+        v-if="authStstus"
         :text="$t('views.settings.devices')"
         icon="ri-smartphone-line"
         @click="$router.push('/menu/settings/devices')"
       />
-      <MenuButton :text="$t('views.settings.api_keys')" icon="ri-key-2-line" @click="$router.push('/menu/settings/apikey')"/>
-      <MenuButton :text="$t('views.settings.about')" icon="ri-information-line" @click="$router.push('/menu/about')"/>
+      <MenuButton
+        v-if="authStstus"
+        :text="$t('views.settings.api_keys')"
+        icon="ri-key-2-line"
+        @click="$router.push('/menu/settings/apikey')"
+      />
     </Menu>
 
-    <Menu v-show="!isTgEnv">
-      <MenuButton
-        @click="logout"
-        classes="btn-warning"
-        :text="$t('views.settings.logout')"
-        icon="ri-logout-box-line"
-      >
-        <i class="ri-arrow-right-s-line text-2xl"></i>
+    <!-- Logout (non-TG only, when authenticated) -->
+    <Menu v-if="!isTgEnv && authStstus">
+      <MenuButton @click="logout" text="views.settings.logout" icon="ri-logout-box-line">
+        <i class="ri-arrow-right-s-line text-xl opacity-50"></i>
       </MenuButton>
     </Menu>
+    <!-- Version -->
+    <div class="flex flex-col items-center gap-1 pt-2 pb-4 opacity-50 select-none">
+      <p class="text-sm font-medium">
+        {{ t('views.settings.version', { version: appVersion }) }}
+      </p>
+      <p class="text-xs font-mono">
+        {{ buildHash }} &middot; {{ buildDate }}
+      </p>
+    </div>
   </div>
 </template>

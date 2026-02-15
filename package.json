@@ -1,6 +1,6 @@
 {
   "name": "tgminiapptemplate",
-  "version": "0.0.0",
+  "version": "0.01b",
   "private": true,
   "type": "module",
   "module": "esnext",

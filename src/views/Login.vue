@@ -11,6 +11,7 @@ const route = useRoute()
 const router = useRouter()
 
 const qrUrl: Ref<string> = ref('')
+const loginCode: Ref<string> = ref('')
 const qrStarted: Ref<boolean> = ref(false)
 const enableSpinner: Ref<boolean> = ref(false)
 const spinnerStatus: Ref<string> = ref('')
@@ -25,6 +26,7 @@ const QR_LIFETIME = 5 * 60 * 1000
 
 function stopQR() {
   qrUrl.value = ''
+  loginCode.value = ''
   if (sseCancel) sseCancel()
   sseCancel = null
 
@@ -58,6 +60,7 @@ async function startQR(): Promise<any> {
   enableSpinner.value = false
 
   loginId = resp.loginId
+  loginCode.value = resp.loginCode
   qrUrl.value = resp.qrUrl
   qrStarted.value = true
   authPromise = resp.authPromise
@@ -68,9 +71,19 @@ async function startQR(): Promise<any> {
   }, QR_LIFETIME)
 
   authPromise
-    ?.then((token) => {
-      console.log('Auth success:', token)
+    ?.then(async (token) => {
       stopQR()
+
+      // Establish refresh session cookie
+      try {
+        await AuthService.recreateTokens()
+      } catch (e) {
+        console.warn('Failed to establish refresh session:', e)
+      }
+
+      // Fill Pinia store + set global auth status
+      await AuthService.check()
+
       showPush('views.auth.login_success', '', 'alert-success', 'ri-check-line')
       router.push(redirect_to)
     })
@@ -108,7 +121,6 @@ async function startLogin() {
   isLoading.value = true
 
   try {
-    console.log('refreshing', redirect_to)
     res = await apiClient.refreshTokens()
   } catch {
     null
@@ -161,6 +173,11 @@ onBeforeUnmount(() => stopQR())
         </div>
         <QrCode v-else :url="qrUrl"></QrCode>
 
+        <div v-if="loginCode" class="flex flex-col items-center gap-1">
+          <p class="text-xs opacity-50">{{ $t('views.auth.code_hint') }}</p>
+          <code class="text-lg font-mono font-bold tracking-widest select-all bg-base-200 px-4 py-1.5 rounded-lg lowercase">{{ loginCode.toLowerCase() }}</code>
+        </div>
+
         <div class="flex flex-row gap-3">
           <button class="btn btn-small btn-square">
             <i as="a" class="ri-github-line text-2xl" href="https://t.me/sniplabot"></i>
@@ -171,10 +188,10 @@ onBeforeUnmount(() => stopQR())
         </div>
       </div>
     </div>
+    <footer class="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4">
+      <button class="btn btn-ghost btn-sm" @click="$router.push('/')">
+        <span class="uppercase tracking-widest">{{ $t('views.auth.skip_login') }}</span>
+      </button>
+    </footer>
   </div>
-  <footer class="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4">
-    <button class="btn btn-ghost btn-sm" @click="$router.push('/')">
-      <span class="uppercase tracking-widest">{{ $t('views.auth.skip_login') }}</span>
-    </button>
-  </footer>
 </template>

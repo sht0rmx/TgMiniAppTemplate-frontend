@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import { execSync } from 'node:child_process'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -6,8 +7,32 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import pkg from './package.json' with { type: 'json' }
+
+function gitHash(): string {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim()
+  } catch {
+    return 'dev'
+  }
+}
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_HASH__: JSON.stringify(gitHash()),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY || 'http://backend:8000',
+        changeOrigin: false,
+        timeout: 0,
+      },
+    },
+    allowedHosts: true
+  },
   plugins: [
     vue(),
     vueDevTools(),

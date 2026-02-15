@@ -4,12 +4,16 @@ import { i18n } from '@/locales/index.js'
 
 import HomeView from '@/views/Home.vue'
 import LoginView from '@/views/Login.vue'
+import AcceptLoginView from '@/views/SettingsViews/AcceptLogin.vue'
 
-import { isTgEnv, WebApp, authRequired, backButton, hiddenNav } from '@/main.js'
+import { isTgEnv, WebApp, authRequired, authStstus, backButton, hiddenNav } from '@/main.ts'
 import ErrorPage from '@/views/NotFound.vue'
 import MenuView from '@/views/Menu.vue'
 import Settings from '@/views/Settings.vue'
-import Devices from '@/views/Devices.vue'
+import Devices from '@/views/SettingsViews/Devices.vue'
+import ApiKeys from '@/views/SettingsViews/ApiKeys.vue'
+import FilesView from '@/views/MenuViews/Files.vue'
+import BotChatView from '@/views/MenuViews/BotChat.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -23,6 +27,12 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: LoginView,
     meta: { titleKey: 'views.auth.header', auth: false, noNav: true },
+  },
+  {
+    path: '/accept',
+    name: 'AcceptLogin',
+    component: AcceptLoginView,
+    meta: { titleKey: 'views.accept_login.header', auth: true, noNav: true },
   },
   {
     path: '/menu',
@@ -43,6 +53,24 @@ const routes: RouteRecordRaw[] = [
     meta: { titleKey: 'views.devices.header', auth: true },
   },
   {
+    path: '/menu/settings/apikey',
+    name: 'ApiKeys',
+    component: ApiKeys,
+    meta: { titleKey: 'views.api_keys.header', auth: true },
+  },
+  {
+    path: '/menu/files',
+    name: 'Files',
+    component: FilesView,
+    meta: { titleKey: 'views.files.header', auth: true },
+  },
+  {
+    path: '/menu/bot',
+    name: 'BotChat',
+    component: BotChatView,
+    meta: { titleKey: 'views.bot.header', auth: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: ErrorPage,
@@ -56,16 +84,14 @@ const router = createRouter({
 })
 
 router.afterEach((to) => {
-  if (to.path.split('/').length <= 2) {
-    if (isTgEnv.value && WebApp) {
-      WebApp.BackButton.hide()
-      backButton.value = false
-    }
+  const isDeep = to.path.split('/').length > 2
+
+  if (isDeep) {
+    backButton.value = true
+    if (isTgEnv.value && WebApp) WebApp.BackButton.show()
   } else {
-    if (isTgEnv.value && WebApp) {
-      WebApp.BackButton.show()
-      backButton.value = true
-    }
+    backButton.value = false
+    if (isTgEnv.value && WebApp) WebApp.BackButton.hide()
   }
 })
 
@@ -78,6 +104,11 @@ router.beforeEach((to, _, next) => {
   } else {
     hiddenNav.value = false
   }
+
+  if (to.meta.auth && !authStstus.value) {
+    return next({ path: '/login', query: { redirect: to.fullPath } })
+  }
+
   return next()
 })
 

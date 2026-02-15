@@ -4,9 +4,9 @@ import BottomDock from '@/components/BottomDock.vue'
 import AuthModal from '@/components/AuthModal.vue'
 import SplashScreen from '@/components/SplashScreen.vue'
 import { hiddenNav, isLoading, isTgEnv, lockPage, technicalWork, unableAccessApi } from '@/main.ts'
-import Drawer from './components/drawer/Drawer.vue'
-import { showPush } from './components/alert/index.ts'
-import Alert from './components/alert/Alert.vue'
+import Drawer from '@/components/drawer/Drawer.vue'
+import { showPush } from '@/components/alert/index.ts'
+import Alert from '@/components/alert/Alert.vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -21,8 +21,8 @@ const containerClasses = computed(() => [
 
 const mainClasses = computed(() => [
   'flex-1 flex overflow-y-auto',
-  isTgEnv.value ? 'px-4 pt-8' : 'px-10 pt-4',
-  'mt-4',
+  isTgEnv.value ? 'px-4' : 'px-4 md:px-6 pt-4',
+
 ])
 
 watch(unableAccessApi, () => {

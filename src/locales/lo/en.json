@@ -11,10 +11,10 @@
       "header": "Menu",
       "title": "Menu",
       "settings_tooltip": "Settings",
-      "empty": {
-        "title": "Menu page is now empty!",
-        "hint": "Add something by editing `frontend/scr/views/Menu.vue`"
-      }
+      "files": "Files",
+      "files_hint": "Upload, download and manage your files",
+      "bot": "Bot messaging",
+      "bot_hint": "Send messages to your Telegram bot"
     },
     "settings": {
       "header": "Settings",
@@ -25,6 +25,7 @@
       "devices": "Devices",
       "about": "About",
       "logout": "Log out",
+      "version": "Snipla for Web v{version}",
       "api_keys": "Api keys"
     },
     "account": {
@@ -43,12 +44,25 @@
       "this_device": "Current device",
       "active": "Active sessions",
       "link": "Scan QR",
+      "current_badge": "current",
+      "session_killed": "Session terminated",
+      "kill_failed": "Failed to terminate session",
       "dropdown": {
-        "ip": "IP adress:",
+        "ip": "IP address:",
         "last_seen": "Last active:",
+        "created": "Created:",
         "terminate": "Terminate session"
       },
       "no_devices": "No authorized devices found.",
+      "or_code": "or enter the code",
+      "code_placeholder": "Enter login code",
+      "accept_code": "Confirm login",
+      "accept_success": "Login confirmed successfully!",
+      "accept_failed": "Failed to confirm login",
+      "link_dialog": {
+        "title": "Link a device",
+        "hint": "Scan a QR code or enter a login code from another device"
+      },
       "scan": {
         "title": "Scan QR",
         "close": "Close",
@@ -58,7 +72,8 @@
     "auth": {
       "header": "Auth",
       "title": "Login to Snipla",
-      "hint": "Scan this QR-code in authorized app",
+      "hint": "Scan this QR-code in authorized app or enter the code",
+      "code_hint": "or enter this code manually",
       "try_again": "Try again",
       "error": "Error occured: {error}",
       "locked_title": "Auth",
@@ -76,10 +91,87 @@
     },
     "accept_login": {
       "header": "Accept login",
-      "title": "Accept login",
-      "hint": "Make sure that you are logging in to a trusted site and trust the device, as your account could fall into the hands of another person",
-      "accept": "Accept",
-      "close": "Close"
+      "title": "Confirm login",
+      "hint": "Make sure you trust the device. Your account could be compromised if you confirm a login you did not initiate.",
+      "accept": "Confirm login",
+      "close": "Done",
+      "search": "Find session",
+      "code_placeholder": "Enter login code",
+      "qr_detected": "Login session detected from QR code",
+      "confirm_label": "Ready to confirm",
+      "not_found": "Login session not found or expired",
+      "invalid_qr": "Invalid QR code data",
+      "accept_failed": "Failed to confirm login. Try again.",
+      "accepted": "Login confirmed successfully!",
+      "success": "Login was successfully confirmed!",
+      "not_authorized": "You need to be logged in to confirm a login"
+    },
+    "api_keys": {
+      "header": "API Keys",
+      "title": "API Keys",
+      "hint": "Create and manage API keys for programmatic access to your account.",
+      "create": "Create API key",
+      "active_keys": "Your keys",
+      "empty": "No API keys yet.",
+      "banned_badge": "disabled",
+      "deleted": "API key deleted",
+      "create_failed": "Failed to create API key",
+      "action_failed": "Action failed",
+      "close": "Close",
+      "create_dialog": {
+        "title": "New API key",
+        "hint": "Give your key a descriptive name so you can identify it later.",
+        "placeholder": "Key name, e.g. My Bot"
+      },
+      "reveal": {
+        "title": "Key created!",
+        "hint": "Copy this key now. You won't be able to see it again.",
+        "copy": "Copy to clipboard",
+        "copied": "Copied!"
+      },
+      "detail": {
+        "created": "Created:",
+        "status": "Status:",
+        "active": "Active",
+        "disabled": "Disabled",
+        "disable": "Disable key",
+        "enable": "Enable key",
+        "delete": "Delete key"
+      }
+    },
+    "files": {
+      "header": "Files",
+      "title": "Files",
+      "hint": "Upload and manage your files. Max file size is 10 MB.",
+      "upload": "Upload file",
+      "your_files": "Your files",
+      "empty": "No files yet.",
+      "uploaded": "File uploaded successfully",
+      "upload_failed": "Failed to upload file",
+      "too_large": "File is too large. Max 10 MB",
+      "deleted": "File deleted",
+      "delete_failed": "Failed to delete file",
+      "download_failed": "Failed to download file",
+      "preview_failed": "Failed to load preview",
+      "preview_unsupported": "Preview is not available for this file type",
+      "detail": {
+        "uploaded": "Uploaded:",
+        "preview": "View",
+        "download": "Download",
+        "delete": "Delete"
+      }
+    },
+    "bot": {
+      "header": "Bot",
+      "title": "Bot",
+      "empty": "Send a message and it will appear in your Telegram chat with the bot",
+      "placeholder": "Type a message...",
+      "you": "You",
+      "bot_name": "Bot",
+      "sending": "Sending...",
+      "sent": "Sent",
+      "error": "Error",
+      "disclaimer": "Messages are sent to your Telegram chat via the bot"
     },
     "not_found": {
       "header": "Page not found",

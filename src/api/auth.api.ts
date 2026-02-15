@@ -46,6 +46,7 @@ export class AuthService {
     }
 
     const loginId = res.data.login_id
+    const loginCode = res.data.code as string
     const base64Params = btoa(loginId)
 
     const qrUrl = `${FRONT_URL}accept?loginid=${base64Params}`
@@ -54,6 +55,7 @@ export class AuthService {
 
     return {
       loginId,
+      loginCode,
       qrUrl,
       authPromise: result.authPromise,
       cancelSse: result.cancel,
@@ -125,6 +127,26 @@ export class AuthService {
       return false
     }
     return true
+  }
+
+  /** GET /api/v1/auth/login/by-code/search/{code} - Search by short code */
+  static async searchByCode(code: string): Promise<boolean> {
+    try {
+      const resp = await apiClientInst.get(`${this.AUTH_BASE}/login/by-code/search/${code}`)
+      return resp.status === 200
+    } catch {
+      return false
+    }
+  }
+
+  /** GET /api/v1/auth/login/by-code/accept/{code} - Accept login by short code */
+  static async acceptByCode(code: string): Promise<boolean> {
+    try {
+      const resp = await apiClientInst.get(`${this.AUTH_BASE}/login/by-code/accept/${code}`)
+      return resp.status === 200
+    } catch {
+      return false
+    }
   }
 
   /** GET /api/v1/auth/check - Check Authentication Status */
